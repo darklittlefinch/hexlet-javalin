@@ -3,6 +3,7 @@ package org.example.hexlet;
 import io.javalin.Javalin;
 import io.javalin.http.NotFoundResponse;
 import org.example.hexlet.dto.courses.CoursePage;
+import org.example.hexlet.dto.courses.CoursesPage;
 import org.example.hexlet.dto.courses.Data;
 import org.example.hexlet.model.Course;
 
@@ -47,6 +48,11 @@ public class HelloWorld {
             var page = new CoursePage(course);
 
             ctx.render("courses/show.jte", Collections.singletonMap("page", page));
+        });
+
+        app.get("/courses", ctx -> {
+            var coursesPage = new CoursesPage(Data.getCoursesList(DATA));
+            ctx.render("courses/index.jte", Collections.singletonMap("page", coursesPage));
         });
 
         app.start(7070);

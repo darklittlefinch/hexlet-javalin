@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Locale;
 import com.github.javafaker.Faker;
+import org.example.hexlet.model.Course;
 
 public class Data {
     private static final List<Map<String, Object>> COURSES = new ArrayList<>();
@@ -44,5 +45,16 @@ public class Data {
                 .filter(course -> course.get("id").equals(id))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public static List<Course> getCoursesList(List<Map<String, Object>> courses) {
+        List<Course> coursesList = new ArrayList<>();
+
+        for (var courseMap: courses) {
+            var course = new Course(courseMap);
+            coursesList.add(course);
+        }
+
+        return coursesList;
     }
 }

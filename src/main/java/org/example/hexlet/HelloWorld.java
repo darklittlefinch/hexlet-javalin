@@ -34,7 +34,7 @@ public class HelloWorld {
             ctx.result("Post ID: " + ctx.pathParam("postId"));
         });
 
-        app.get("/", ctx -> ctx.render("index.jte"));
+        app.get("/", ctx -> ctx.render("greeting.jte"));
 
         app.get("/courses/{id}", ctx -> {
             var id = ctx.pathParam("id");

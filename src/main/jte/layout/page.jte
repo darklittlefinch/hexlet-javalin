@@ -1,4 +1,5 @@
 @import gg.jte.Content
+@param Content header = null
 @param Content content
 @param Content footer = null
 
@@ -13,8 +14,10 @@
         <p>
             <a href="/">Main</a>
             <a href="/courses">Courses</a>
+            <a href="/users">Users</a>
         </p>
-        ${footer}
+        ${header}
         ${content}
+        ${footer}
     </body>
 </html>

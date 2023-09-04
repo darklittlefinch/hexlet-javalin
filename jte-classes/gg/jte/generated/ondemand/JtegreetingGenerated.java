@@ -20,7 +20,7 @@ public final class JtegreetingGenerated {
 		jteOutput.writeContent("\r\n");
 		jteOutput.writeContent("\r\n");
 		jteOutput.writeContent("\r\n\r\n");
-		gg.jte.generated.ondemand.layout.JtepageGenerated.render(jteOutput, jteHtmlInterceptor, new gg.jte.html.HtmlContent() {
+		gg.jte.generated.ondemand.layout.JtepageGenerated.render(jteOutput, jteHtmlInterceptor, null, new gg.jte.html.HtmlContent() {
 			public void writeTo(gg.jte.html.HtmlTemplateOutput jteOutput) {
 				jteOutput.writeContent("\r\n        <h1 class=\"text-body-emphasis\">Привет Хекслет!</h1>\r\n        <p>Javalin + jte</p>\r\n    ");
 			}

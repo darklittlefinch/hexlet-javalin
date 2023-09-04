@@ -27,6 +27,9 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
 
     implementation ("com.github.javafaker:javafaker:1.0.2")
+
+    implementation 'org.apache.commons:commons-text:1.10.0'
+    implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1'
 }
 
 test {

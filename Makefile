@@ -1,0 +1,3 @@
+start:
+	gradle run
+

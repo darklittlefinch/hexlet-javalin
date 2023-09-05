@@ -3,9 +3,11 @@ package org.example.hexlet;
 import io.javalin.Javalin;
 import io.javalin.http.NotFoundResponse;
 
+import io.javalin.validation.ValidationException;
 import org.example.hexlet.dto.courses.CoursePage;
 import org.example.hexlet.dto.courses.CoursesPage;
 import org.example.hexlet.dto.courses.Data;
+import org.example.hexlet.dto.users.BuildUserPage;
 import org.example.hexlet.dto.users.UsersPage;
 import org.example.hexlet.model.Course;
 import org.example.hexlet.model.User;
@@ -28,16 +30,31 @@ public class HelloWorld {
             ctx.result("Hello, " + name + "!");
         });
 
-        app.get("/users/new", ctx -> ctx.render("users/new.jte"));
+        app.get("/users/new", ctx -> {
+            var page = new BuildUserPage();
+            ctx.render("users/new.jte", Collections.singletonMap("page", page));
+        });
+
         app.post("/users", ctx -> {
             var name = ctx.formParam("name").trim();
             var email = ctx.formParam("email").toLowerCase().trim();
-            var password = ctx.formParam("password");
-            var passwordConfirmation = ctx.formParam("passwordConfirmation");
+//            var password = ctx.formParam("password");
+//            var passwordConfirmation = ctx.formParam("passwordConfirmation");
 
-            var user = new User(name, email, password);
-            UserRepository.save(user);
-            ctx.redirect("/users");
+            try {
+                var passwordConfirmation = ctx.formParam("passwordConfirmation");
+                var password = ctx.formParamAsClass("password", String.class)
+                        .check(value -> value.equals(passwordConfirmation), "Passwords are not the same")
+                        .check(value -> value.length() > 6, "Password must contain more than 6 symbols")
+                        .get();
+
+                var user = new User(name, email, password);
+                UserRepository.save(user);
+                ctx.redirect("/users");
+            } catch (ValidationException e) {
+                var page = new BuildUserPage(name, email, e.getErrors());
+                ctx.render("users/new.jte", Collections.singletonMap("page", page));
+            }
         });
 
         app.get("/users/{userId}", ctx -> {

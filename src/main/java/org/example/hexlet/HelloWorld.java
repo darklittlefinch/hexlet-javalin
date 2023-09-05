@@ -3,18 +3,17 @@ package org.example.hexlet;
 import io.javalin.Javalin;
 import io.javalin.http.NotFoundResponse;
 
-import org.apache.commons.text.StringEscapeUtils;
-
 import org.example.hexlet.dto.courses.CoursePage;
 import org.example.hexlet.dto.courses.CoursesPage;
 import org.example.hexlet.dto.courses.Data;
+import org.example.hexlet.dto.users.UsersPage;
 import org.example.hexlet.model.Course;
+import org.example.hexlet.model.User;
+import org.example.hexlet.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HelloWorld {
     private static final List<Map<String, Object>> DATA = Data.getData();
@@ -24,14 +23,21 @@ public class HelloWorld {
             config.plugins.enableDevLogging();
         });
 
-//        app.get("/", ctx -> ctx.result("Hello World"));
-
-        app.get("/users", ctx -> ctx.result("GET /users"));
-        app.post("/users", ctx -> ctx.result("POST /users"));
-
         app.get("/hello", ctx -> {
             var name = ctx.queryParamAsClass("name", String.class).getOrDefault("World");
             ctx.result("Hello, " + name + "!");
+        });
+
+        app.get("/users/new", ctx -> ctx.render("users/new.jte"));
+        app.post("/users", ctx -> {
+            var name = ctx.formParam("name").trim();
+            var email = ctx.formParam("email").toLowerCase().trim();
+            var password = ctx.formParam("password");
+            var passwordConfirmation = ctx.formParam("passwordConfirmation");
+
+            var user = new User(name, email, password);
+            UserRepository.save(user);
+            ctx.redirect("/users");
         });
 
         app.get("/users/{userId}", ctx -> {
@@ -40,12 +46,17 @@ public class HelloWorld {
 //            ctx.contentType("text/html");
 //            ctx.result(escapedId);
             String untrustedHTML = ctx.pathParam("userId");
-
         });
 
         app.get("/users/{userId}/post/{postId}", ctx -> {
             ctx.result("User ID: " + ctx.pathParam("userId"));
             ctx.result("Post ID: " + ctx.pathParam("postId"));
+        });
+
+        app.get("/users", ctx -> {
+            List<User> users = UserRepository.getEntities();
+            UsersPage page = new UsersPage(users);
+            ctx.render("users/index.jte", Collections.singletonMap("page", page));
         });
 
         app.get("/", ctx -> ctx.render("greeting.jte"));

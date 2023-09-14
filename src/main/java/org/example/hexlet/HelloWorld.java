@@ -4,6 +4,8 @@ import io.javalin.Javalin;
 import io.javalin.http.NotFoundResponse;
 
 import io.javalin.validation.ValidationException;
+import org.example.hexlet.controller.SessionController;
+import org.example.hexlet.dto.GreetingPage;
 import org.example.hexlet.dto.courses.CoursePage;
 import org.example.hexlet.dto.courses.CoursesPage;
 import org.example.hexlet.dto.courses.Data;
@@ -25,17 +27,17 @@ public class HelloWorld {
             config.plugins.enableDevLogging();
         });
 
-        app.get("/hello", ctx -> {
+        app.get(NamedRoutes.helloPath(), ctx -> {
             var name = ctx.queryParamAsClass("name", String.class).getOrDefault("World");
             ctx.result("Hello, " + name + "!");
         });
 
-        app.get("/users/new", ctx -> {
+        app.get(NamedRoutes.newUserPath(), ctx -> {
             var page = new BuildUserPage();
             ctx.render("users/new.jte", Collections.singletonMap("page", page));
         });
 
-        app.post("/users", ctx -> {
+        app.post(NamedRoutes.usersPath(), ctx -> {
             var name = ctx.formParam("name").trim();
             var email = ctx.formParam("email").toLowerCase().trim();
 //            var password = ctx.formParam("password");
@@ -50,14 +52,14 @@ public class HelloWorld {
 
                 var user = new User(name, email, password);
                 UserRepository.save(user);
-                ctx.redirect("/users");
+                ctx.redirect(NamedRoutes.usersPath());
             } catch (ValidationException e) {
                 var page = new BuildUserPage(name, email, e.getErrors());
                 ctx.render("users/new.jte", Collections.singletonMap("page", page));
             }
         });
 
-        app.get("/users/{userId}", ctx -> {
+        app.get(NamedRoutes.userPath("{userId}"), ctx -> {
 //            var id = ctx.pathParam("userId");
 //            var escapedId = StringEscapeUtils.escapeHtml4(id);
 //            ctx.contentType("text/html");
@@ -65,20 +67,25 @@ public class HelloWorld {
             String untrustedHTML = ctx.pathParam("userId");
         });
 
-        app.get("/users/{userId}/post/{postId}", ctx -> {
+        app.get(NamedRoutes.postPath("{userId}", "{postId}"), ctx -> {
             ctx.result("User ID: " + ctx.pathParam("userId"));
             ctx.result("Post ID: " + ctx.pathParam("postId"));
         });
 
-        app.get("/users", ctx -> {
+        app.get(NamedRoutes.usersPath(), ctx -> {
             List<User> users = UserRepository.getEntities();
             UsersPage page = new UsersPage(users);
             ctx.render("users/index.jte", Collections.singletonMap("page", page));
         });
 
-        app.get("/", ctx -> ctx.render("greeting.jte"));
+        app.get(NamedRoutes.mainPath(), ctx -> {
+            var visited = Boolean.valueOf(ctx.cookie("visited"));
+            var page = new GreetingPage(visited, ctx.sessionAttribute("currentUser"));
+            ctx.render("greeting.jte", Collections.singletonMap("page", page));
+            ctx.cookie("visited", String.valueOf(true));
+        });
 
-        app.get("/courses/{id}", ctx -> {
+        app.get(NamedRoutes.coursePath("{id}"), ctx -> {
             var id = ctx.pathParam("id");
 
             var courseMap = Data.getCourse(Long.parseLong(id));
@@ -92,7 +99,7 @@ public class HelloWorld {
             ctx.render("courses/show.jte", Collections.singletonMap("page", page));
         });
 
-        app.get("/courses", ctx -> {
+        app.get(NamedRoutes.coursesPath(), ctx -> {
             var term = ctx.queryParam("term");
             List<Course> courses;
 
@@ -107,6 +114,10 @@ public class HelloWorld {
             var coursesPage = new CoursesPage(courses, term);
             ctx.render("courses/index.jte", Collections.singletonMap("page", coursesPage));
         });
+
+        app.get(NamedRoutes.sessionsBuildPath(), SessionController::build);
+        app.post(NamedRoutes.sessionsPath(), SessionController::create);
+        app.delete(NamedRoutes.sessionsPath(), SessionController::destroy);
 
         app.start(7070);
     }

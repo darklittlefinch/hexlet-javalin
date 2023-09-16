@@ -13,6 +13,7 @@ import org.example.hexlet.dto.users.BuildUserPage;
 import org.example.hexlet.dto.users.UsersPage;
 import org.example.hexlet.model.Course;
 import org.example.hexlet.model.User;
+import org.example.hexlet.repository.CourseRepository;
 import org.example.hexlet.repository.UserRepository;
 
 import java.util.Collections;
@@ -85,34 +86,60 @@ public class HelloWorld {
             ctx.cookie("visited", String.valueOf(true));
         });
 
-        app.get(NamedRoutes.coursePath("{id}"), ctx -> {
-            var id = ctx.pathParam("id");
-
-            var courseMap = Data.getCourse(Long.parseLong(id));
-            if (courseMap == null) {
-                throw new NotFoundResponse("Course not found");
-            }
-
-            var course = new Course(courseMap);
-            var page = new CoursePage(course);
-
-            ctx.render("courses/show.jte", Collections.singletonMap("page", page));
-        });
+//        app.get(NamedRoutes.coursePath("{id}"), ctx -> {
+//            var id = ctx.pathParamAsClass("id", Long.class).get();
+//
+////            var courseMap = Data.getCourse(Long.parseLong(id));
+////            if (courseMap == null) {
+////                throw new NotFoundResponse("Course not found");
+////            }
+////
+////            var course = new Course(courseMap);
+//            var course = CourseRepository.find(id).get();
+//            var page = new CoursePage(course);
+//
+//            ctx.render("courses/show.jte", Collections.singletonMap("page", page));
+//        });
 
         app.get(NamedRoutes.coursesPath(), ctx -> {
+            var flash = ctx.consumeSessionAttribute("flash");
+
             var term = ctx.queryParam("term");
             List<Course> courses;
 
+//            if (term != null) {
+//                courses = Data.getCoursesList(DATA).stream()
+//                        .filter(course -> course.getName().contains(term) || course.getDescription().contains(term))
+//                        .toList();
+//            } else {
+//                courses = Data.getCoursesList(DATA);
+//            }
+
             if (term != null) {
-                courses = Data.getCoursesList(DATA).stream()
+                courses = CourseRepository.getEntities().stream()
                         .filter(course -> course.getName().contains(term) || course.getDescription().contains(term))
                         .toList();
             } else {
-                courses = Data.getCoursesList(DATA);
+                courses = CourseRepository.getEntities();
             }
 
             var coursesPage = new CoursesPage(courses, term);
+            coursesPage.setFlash(ctx.consumeSessionAttribute("flash"));
             ctx.render("courses/index.jte", Collections.singletonMap("page", coursesPage));
+        });
+
+        app.get(NamedRoutes.newCoursePath(), ctx -> {
+            ctx.render("courses/build.jte");
+        });
+
+        app.post(NamedRoutes.coursesPath(), ctx -> {
+            var name = ctx.formParam("name");
+            var description = ctx.formParam("description");
+
+            var course = new Course(name, description);
+            CourseRepository.save(course);
+            ctx.sessionAttribute("flash", "Course has been created!");
+            ctx.redirect(NamedRoutes.coursesPath());
         });
 
         app.get(NamedRoutes.sessionsBuildPath(), SessionController::build);

@@ -1,3 +1,4 @@
+@import org.example.hexlet.NamedRoutes
 @import org.example.hexlet.dto.courses.CoursesPage
 @param CoursesPage page
 
@@ -16,8 +17,10 @@
 <%--</html>--%>
 
 @template.layout.page(
+    page = page,
+
     header = @`
-        <form action="/courses" method="get">
+        <form action="${NamedRoutes.coursesPath()}" method="get">
             <input type="search" name="term" value="${page.getTerm()}">
             <input type="submit" value="Search courses...">
         </form>

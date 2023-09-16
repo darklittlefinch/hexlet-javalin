@@ -1,7 +1,6 @@
 package org.example.hexlet.controller;
 
 import io.javalin.http.Context;
-import io.javalin.validation.ValidationException;
 import org.example.hexlet.NamedRoutes;
 import org.example.hexlet.dto.users.BuildUserPage;
 import org.example.hexlet.model.User;
